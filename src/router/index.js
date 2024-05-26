@@ -7,10 +7,10 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-import componentsRouter from './modules/components'
-import chartsRouter from './modules/charts'
+// import componentsRouter from './modules/components'
+// import chartsRouter from './modules/charts'
 import tableRouter from './modules/table'
-import nestedRouter from './modules/nested'
+// import nestedRouter from './modules/nested'
 
 /**
  * Note: sub-menu only appear when route children.length >= 1
@@ -142,16 +142,7 @@ export const asyncRoutes = [
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
-      {
-        path: 'project',
-        component: () => import('@/views/case-table/case-project'),
-        name: 'CaseProject',
-        meta: {
-          title: 'Project',
-          roles: ['admin', 'editor']
-          // if do not set roles, means: this page does not require permission
-        }
-      },
+
       {
         path: 'patient',
         component: () => import('@/views/case-table/patient'),
@@ -180,6 +171,25 @@ export const asyncRoutes = [
       //     roles: ['admin', 'editor']
       //   }
       // },
+      {
+        path: 'project',
+        component: () => import('@/views/case-table/case-project'),
+        name: 'CaseProject',
+        meta: {
+          title: 'Project',
+          roles: ['admin', 'editor']
+          // if do not set roles, means: this page does not require permission
+        }
+      },
+      {
+        path: 'project-study',
+        component: () => import('@/views/case-table/project-study'),
+        name: 'ProjectStudy',
+        meta: {
+          title: 'project study',
+          roles: ['admin', 'editor']
+        }
+      },
       {
         path: 'project-series',
         component: () => import('@/views/case-table/project-series'),

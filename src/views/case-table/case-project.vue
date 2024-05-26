@@ -2,8 +2,23 @@
   <div class="app-container">
     <div class="filter-container">
       <div>
-        <el-button @click="dialogFormVisible = true">新增專案</el-button>
-        <el-button @click="deleteProject">刪除專案</el-button>
+        <el-button type="primary" @click="dialogFormVisible = true">新增專案</el-button>
+        <el-button type="danger" @click="deleteProject">刪除專案</el-button>
+        <el-button @click="handleUploadExcel">上傳檔案</el-button>
+        <el-button >範例Excel</el-button>
+        <el-dialog title="上傳檔案" :visible.sync="dialogUpdateFormVisible">
+          <div>
+            <upload-excel-component />
+          </div>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogUpdateFormVisible = false">
+              {{ $t('table.cancel') }}
+            </el-button>
+            <el-button type="primary" >
+              {{ $t('table.confirm') }}
+            </el-button>
+      </div>
+        </el-dialog>
       </div>
 
       <!-- 用 checkbox 紀錄要顯示的欄位 -->
@@ -52,11 +67,12 @@
 </template>
 <script>
 import waves from '@/directive/waves'
-// import { fetchList } from '@/api/study'
+import { getProject,addProject } from '@/api/project'
 import request from '@/utils/myrequest'
-// import { string } from 'jszip/lib/support'
+import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 export default {
   name: 'Study',
+  components: { UploadExcelComponent },
   directives: { waves },
   data() {
     return {
@@ -76,7 +92,8 @@ export default {
         gender: undefined,
         sort: '+id'
       },
-      selection_list: []
+      selection_list: [],
+      dialogUpdateFormVisible: false,
     }
   },
   created() {
@@ -85,30 +102,22 @@ export default {
   methods: {
     getList(updateFormHead = false) {
       this.listLoading = true
-      request({
-        url: 'query/v2/list_project',
-        method: 'get',
-        params: {}
-      }).then((response) => {
-        console.log('測試 api')
-        // console.log('response', response)
+      getProject().then(response => {
+        console.log('response')
+        console.log(response)
+        // this.list = response.data.items
+        // this.total = response.data.total
+        // console.log('this.list')
+        // console.log(this.list)
         this.list = response.data.data.items
         this.total = response.data.data.total
         this.listKeys = response.data.key
 
+        // Just to simulate the time of the request
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
       })
-        .catch((error) => console.log('catch' + error))
-
-      // 完成查詢
-      this.listLoading = false
-
-      // 更新要顯示的欄位
-      if (updateFormHead) this.formThead = this.listKeys
-
-      // })
     },
 
     createdProject() {
@@ -156,6 +165,10 @@ export default {
       console.log('handleSelectionChange')
       console.log(selection)
       this.selection_list = selection
+    },
+    handleUploadExcel() {
+      console.log('handleUploadExcel')
+      this.dialogUpdateFormVisible=true
     }
   }
 }

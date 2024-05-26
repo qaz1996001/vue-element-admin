@@ -27,6 +27,8 @@
           <el-row>
             <el-col :span="8">
               <el-button type="primary" @click="getList(true,true)">search</el-button>
+              <el-button type="primary" @click="downloadExcel()">download excel</el-button>
+              <el-button @click="downloadExcel()">add to project</el-button>
             </el-col>
           </el-row>
         </el-form>
@@ -113,6 +115,10 @@
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue' // secondary package based on el-pagination
 import request from '@/utils/myrequest'
+import { parseTime } from '@/utils'
+
+import { export_json_to_excel } from '@/vendor/Export2Excel'
+
 export default {
   name: 'Study',
   components: { Pagination },
@@ -239,7 +245,47 @@ export default {
         }
       }
     },
-
+    downloadExcel() {
+      const url = '/query/v2/list_study/download'
+      console.log('this.downloadExcel')
+      console.log('this.search_list')
+      console.log(this.search_list)
+      console.log('this.formThead')
+      console.log(this.formThead)
+      const filter_list = this.search_list.filter(e => {
+        return (e.field.length > 0) & (e.op.length > 0) & (e.value.length > 0)
+      })
+      request({
+        url: url,
+        method: 'post',
+        params: this.listQuery,
+        data: { 'filter_': filter_list }
+      }).then((response) => {
+        // console.log('response.data')
+        // console.log(response.data)
+        const header = response.data.key.filter(e => {
+          return this.formThead.includes(e);
+        })
+        console.log('header')
+        console.log(header)
+        const data = this.formatJson(header, response.data.data.items)
+        export_json_to_excel({
+          header: header,
+          data: data,
+          filename: 'export_data',
+          autoWidth: true,
+          bookType: 'xlsx' })
+      })
+    },
+    formatJson(filterVal, jsonData) {
+      return jsonData.map(v => filterVal.map(j => {
+        if (j === 'timestamp') {
+          return parseTime(v[j])
+        } else {
+          return v[j]
+        }
+      }))
+    },
     add_search_item() {
       this.search_list.push({
         field: '',
@@ -367,23 +413,24 @@ export default {
 
 }
 
-button.el-button.el-button--primary {
+button.el-button--primary {
   margin-bottom: 10px;
   padding: 10px 20px 10px 20px;
   font-size: 14px;
   border-radius: 4px;
-  margin-left: 30px;
 }
-
-button.el-button.el-button--danger {
+button.el-button--danger {
   margin-bottom: 10px;
   padding: 10px 20px 10px 20px;
   font-size: 14px;
   border-radius: 4px;
-  margin-left: 30px;
 }
-
+div:nth-child(4) button{
+  margin-left: 30px;
+  padding: 10px 20px 10px 20px;
+}
 .el-table th{
   user-select: initial;
 }
+
 </style>

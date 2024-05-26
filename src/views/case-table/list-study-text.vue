@@ -208,19 +208,7 @@ export default {
 
 }
 
-button.el-button.el-button--primary {
-  margin-bottom: 10px;
-  padding-left: 10px;
-  font-size: 14px;
-  border-radius: 4px;
-  margin-left: 30px;
-}
-
-button.el-button.el-button--danger {
-  margin-bottom: 10px;
-  padding-left: 10px;
-  font-size: 14px;
-  border-radius: 4px;
+div:nth-child(4) button{
   margin-left: 30px;
 }
 
@@ -232,7 +220,3 @@ button.el-button.el-button--danger {
 
 }
 </style>
-<!--#app > div > div.main-container.hasTagsView > section > div > div.el-table.el-table--fit.el-table--border.el-table--enable-row-hover.el-table--enable-row-transition.el-table--medium > div.el-table__body-wrapper.is-scrolling-none > table > tbody > tr:nth-child(1) > td.el-table_1_column_8.is-center > div-->
-<!-- #app > div > div.main-container.hasTagsView > section > div > div.el-table.el-table--fit.el-table--border.el-table--enable-row-hover.el-table--enable-row-transition.el-table--medium > div.el-table__body-wrapper.is-scrolling-none > table > tbody > tr:nth-child(1) > td.el-table_2_column_16.is-center > div -->
-<!--#app > div > div.main-container.hasTagsView > section > div > div.el-table.el-table--fit.el-table--border.el-table--enable-row-hover.el-table--enable-row-transition.el-table--medium > div.el-table__body-wrapper.is-scrolling-none > table > tbody > tr:nth-child(2) > td.el-table_2_column_16.is-center-->
-<!--#app > div > div.main-container.hasTagsView > section > div > div.el-table.el-table&#45;&#45;fit.el-table&#45;&#45;border.el-table&#45;&#45;enable-row-hover.el-table&#45;&#45;enable-row-transition.el-table&#45;&#45;medium > div.el-table__body-wrapper.is-scrolling-none > table > tbody > tr:nth-child(3) > td.el-table_1_column_8.is-center > div-->
