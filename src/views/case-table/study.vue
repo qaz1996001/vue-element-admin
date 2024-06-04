@@ -413,22 +413,14 @@ export default {
 
 }
 
-button.el-button--primary {
+button.el-button.el-button--primary {
   margin-bottom: 10px;
-  padding: 10px 20px 10px 20px;
+  padding-left: 10px;
   font-size: 14px;
   border-radius: 4px;
-}
-button.el-button--danger {
-  margin-bottom: 10px;
-  padding: 10px 20px 10px 20px;
-  font-size: 14px;
-  border-radius: 4px;
-}
-div:nth-child(4) button{
   margin-left: 30px;
-  padding: 10px 20px 10px 20px;
 }
+
 .el-table th{
   user-select: initial;
 }

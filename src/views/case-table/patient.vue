@@ -119,15 +119,7 @@ export default {
 
 </script>
 <style>
-.el-input--medium  {
-  height: 36px;
-  /* line-height: 36px; */
-  width: 95%;
-  margin-top: 2%;
-}
-.el-button {
-  margin-top: 5%;
-}
+
 .el-table th{
   user-select: initial;
 }
