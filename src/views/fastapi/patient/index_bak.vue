@@ -10,56 +10,6 @@
       @downloadExcel="downloadExcel"
       @addToProject="addToProject"
     />
-    <el-form>
-      <el-row>
-        <el-col :span="4">
-          <custom-select
-            placeholder="General"
-            :keys="general_keys"
-            v-model="general_keys_select"
-            :formThead="formThead">
-
-          </custom-select>
-        </el-col>
-
-        <el-col :span="4">
-          <custom-select
-            placeholder="Structure"
-            :keys="structure_keys"
-            v-model="structure_keys_select"
-            :formThead="formThead">
-          </custom-select>
-
-        </el-col>
-        <el-col :span="4">
-          <custom-select
-            placeholder="Special"
-            :keys="special_keys"
-            v-model="special_keys_select"
-            :formThead="formThead">
-          </custom-select>
-
-        </el-col>
-        <el-col :span="4">
-          <custom-select
-            placeholder="Perfusion"
-            :keys="perfusion_keys"
-            v-model="perfusion_keys_select"
-            :formThead="formThead">
-          </custom-select>
-        </el-col>
-        <el-col :span="4">
-          <custom-select
-            placeholder="Functional"
-            :keys="functional_keys"
-            v-model="functional_keys_select"
-            :formThead="formThead">
-          </custom-select>
-        </el-col>
-
-      </el-row>
-    </el-form>
-
     <ElTable :loading="listLoading" :data="list" :columns="formThead" />
 
     <pagination
@@ -69,7 +19,6 @@
       :limit.sync="listQuery.size"
       @pagination="getList"
     />
-
   </div>
 </template>
 <script>
@@ -79,18 +28,14 @@ import request from '@/utils/myrequest'
 import { parseTime } from '@/utils'
 import FilterContainer from '@/components/Custom/FilterContainer.vue'
 import ElTable from '@/components/Custom/ElTable.vue'
-import CustomSelect from '@/components/Custom/CustomSelect.vue'
-// import Pagination from '@/components/Custom/Pagination.vue'
-
-import { export_json_to_excel } from '@/vendor/Export2Excel'
-
+import {export_json_to_excel} from "@/vendor/Export2Excel";
 export default {
-  name: 'Study',
-  components: { Pagination, ElTable, FilterContainer, CustomSelect },
+  name: 'Patient',
+  components: { Pagination, ElTable, FilterContainer },
   directives: { waves },
   data() {
     return {
-      base_url: '/query/v2/list_study',
+      base_url: 'http://127.0.0.1:8000/api/v1',
       formThead: [], // 顯示的欄位
       list: null,
       listKeys: [],
@@ -104,15 +49,7 @@ export default {
         sort: '+study_uid'
       },
       general_keys: [],
-      structure_keys: [],
-      special_keys: [],
-      perfusion_keys: [],
-      functional_keys: [],
-      general_keys_select: [],
-      structure_keys_select: [],
-      special_keys_select: [],
-      perfusion_keys_select: [],
-      functional_keys_select: [],
+      check_general_keys_all: true,
       // seach
       op_list: [],
       search_key_list: [],
@@ -122,8 +59,7 @@ export default {
           op: '',
           value: ''
         }
-      ],
-      max_collapse_tag: 2
+      ]
     }
   },
   created() {
@@ -133,8 +69,7 @@ export default {
     getList(updateFormHead = false, is_search = false) {
       console.log('getList')
       this.listLoading = true
-      // const url = this.base_url + '/study/query/series'
-      const url = this.base_url
+      const url = this.base_url + '/patient/'
       if (is_search) {
         console.log('this.search_list')
         console.log(this.search_list)
@@ -149,14 +84,19 @@ export default {
         })
         request({
           url: url,
-          method: 'post',
+          method: 'get',
           params: this.listQuery,
           data: { 'filter_': filter_list }
         }).then((response) => {
-          this.list = response.data.items
+          let items = response.data.items.map((x) =>{
+            let series_description = x['series_description']
+            for (let seriesDescriptionElement of series_description) {
+              x[seriesDescriptionElement] = 1
+            }
+            return x
+          })
+          this.list = items
           this.total = response.data.total
-          console.log('this.total')
-          console.log(this.total)
           this.listKeys = response.data.key
           this.general_keys = response.data.group_key.general_keys
           this.structure_keys = response.data.group_key.structure_keys
@@ -166,7 +106,7 @@ export default {
           this.search_key_list = []
           this.search_key_list.push(...this.general_keys, 'series_description')
           this.op_list = response.data.op_list
-          this.general_keys_select = true
+          this.check_general_keys_all = true
           this.check_structure_keys_all = true
           this.check_special_keys_all = true
           this.check_perfusion_keys_all = true
@@ -191,36 +131,21 @@ export default {
       } else {
         const rep = request({
           url: url,
-          method: 'post',
+          method: 'get',
           params: this.listQuery,
           data: { 'filter_': [] }
         }).then((response) => {
-
-          this.list = response.data.data.items
-          this.total = response.data.data.total
-          this.listKeys = response.data.key
-          this.general_keys = response.data.group_key.general_keys
-          this.general_keys_select.push(...this.general_keys)
-          this.structure_keys = response.data.group_key.structure_keys
-          this.structure_keys_select.push(...this.structure_keys)
-          this.special_keys = response.data.group_key.special_keys
-          this.special_keys_select.push(...this.special_keys)
-          this.perfusion_keys = response.data.group_key.perfusion_keys
-          this.perfusion_keys_select.push(...this.perfusion_keys)
-          this.functional_keys = response.data.group_key.functional_keys
-          this.functional_keys_select.push(...this.functional_keys)
-          this.search_key_list = []
-          this.search_key_list.push(...this.general_keys, 'series_description')
+          console.log('response.data')
+          console.log(response.data)
+          this.list = response.data.items
+          this.total = response.data.total
+          this.listKeys = response.data.series_description
           this.op_list = response.data.op_list
           // 更新要顯示的欄位
           if (updateFormHead) {
             this.formThead = []
-            this.formThead.push(...this.general_keys_select)
-            this.formThead.push(...this.structure_keys_select)
-            this.formThead.push(...this.special_keys_select)
-            this.formThead.push(...this.perfusion_keys_select)
-            this.formThead.push(...this.functional_keys_select)
-        }
+            this.formThead.push(...this.general_keys)
+          }
           setTimeout(() => {
             this.listLoading = false
           }, 1.5 * 1000)
@@ -296,36 +221,10 @@ export default {
         }
       }
     },
-    handleGeneralSelectChange(val){
-      this.handleSelectChange(val,0)
-    },
-    handleSelectChange(val,offset_index){
-      console.log('handleSelectChange')
-      console.log(val)
-      for (let i = 0; i < val.length; i++) {
-        const index = this.formThead.indexOf(val[i])
-        if (index === -1) { // only splice array when item is found
-          this.formThead.splice(i + offset_index, 0, val[i]) // 2nd parameter means remove one item only
-          }
-      }
-    },
-    handleRemoveTag(val){
-      console.log('handleRemoveTag')
-      console.log(val)
-      const index = this.formThead.indexOf(val)
-      if (index > -1) { // only splice array when item is found
-          this.formThead.splice(index, 1) // 2nd parameter means remove one item only
-        }
-    },
-    handleRemoveTagAll(fun){
-      console.log('handleRemoveTag')
-      console.log(fun)
-      // fun(false)
-    },
     handleGeneralCheckAllChange(is_checked) {
       console.log('handleGeneralCheckAllChange')
-      // this.general_keys_select = is_checked
-      console.log('general_keys_select', this.general_keys_select)
+      this.check_general_keys_all = is_checked
+      console.log('this.check_general_keys_all', this.check_general_keys_all)
       this.handleAllChange(is_checked, this.general_keys, 0)
     },
     handleStructureCheckAllChange(is_checked) {
@@ -421,37 +320,22 @@ export default {
     addToProject(){
       console.log('addToProject')
     },
-    handleAddKey(key) {
-      console.log('Added key:', key);
-    },
-    handleRemoveKey(key) {
-      console.log('Removed key:', key);
-    },
   }
 }
-
 </script>
 <style>
-
-.el-table th{
-  user-select: initial;
+.el-input--medium .el-input__inner {
+  height: 36px;
+  /* line-height: 36px; */
+  width: 95%;
+  margin-top: 2%;
 }
 
-.el-form-item.el-form-item--default div:nth-child(3) > div > input{
-  width: 85%;
+.el-button--medium {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 10px 20px 10px 20px;
+  font-size: 14px;
+  border-radius: 4px;
 }
-
-button.el-button {
-  margin-bottom: 15px;
-  margin-right: 15px;
-  font-size: 16px;
-  border-radius: 10px;
-}
-
-.el-select{
-  margin-bottom: 15px;
-  margin-right: 15px;
-}
-
 </style>
-
