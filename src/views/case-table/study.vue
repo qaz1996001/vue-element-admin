@@ -230,13 +230,13 @@ export default {
       }
     },
     downloadExcel() {
-      const url = this.base_url + '/study/query/series/download'
+      const url = this.base_url + '/download'
       // const url = '/query/v2/list_study/download'
-      console.log('this.downloadExcel')
-      console.log('this.search_list')
-      console.log(this.search_list)
-      console.log('this.formThead')
-      console.log(this.formThead)
+      // console.log('this.downloadExcel')
+      // console.log('this.search_list')
+      // console.log(this.search_list)
+      // console.log('this.formThead')
+      // console.log(this.formThead)
       const filter_list = this.search_list.filter(e => {
         return (e.field.length > 0) & (e.op.length > 0) & (e.value.length > 0)
       })
@@ -246,21 +246,20 @@ export default {
         params: this.listQuery,
         data: { 'filter_': filter_list }
       }).then((response) => {
-        // console.log('response.data')
-        // console.log(response.data)
         const header = response.data.key.filter(e => {
           return this.formThead.includes(e);
         })
-        console.log('header')
-        console.log(header)
-        let items = response.data.items.map((x) =>{
-          let series_description = x['series_description']
-          for (let seriesDescriptionElement of series_description) {
-            x[seriesDescriptionElement] = 1
-          }
-          return x
-        })
-        const data = this.formatJson(header, response.data.items)
+        // console.log('header')
+        // console.log(header)
+        let items = response.data.data.items
+        // let items = response.data.items.map((x) =>{
+        //   let series_description = x['series_description']
+        //   for (let seriesDescriptionElement of series_description) {
+        //     x[seriesDescriptionElement] = 1
+        //   }
+        //   return x
+        // })
+        const data = this.formatJson(header, items)
 
         export_json_to_excel({
           header: header,
@@ -296,136 +295,8 @@ export default {
         }
       }
     },
-    handleGeneralSelectChange(val){
-      this.handleSelectChange(val,0)
-    },
-    handleSelectChange(val,offset_index){
-      console.log('handleSelectChange')
-      console.log(val)
-      for (let i = 0; i < val.length; i++) {
-        const index = this.formThead.indexOf(val[i])
-        if (index === -1) { // only splice array when item is found
-          this.formThead.splice(i + offset_index, 0, val[i]) // 2nd parameter means remove one item only
-          }
-      }
-    },
-    handleRemoveTag(val){
-      console.log('handleRemoveTag')
-      console.log(val)
-      const index = this.formThead.indexOf(val)
-      if (index > -1) { // only splice array when item is found
-          this.formThead.splice(index, 1) // 2nd parameter means remove one item only
-        }
-    },
-    handleRemoveTagAll(fun){
-      console.log('handleRemoveTag')
-      console.log(fun)
-      // fun(false)
-    },
-    handleGeneralCheckAllChange(is_checked) {
-      console.log('handleGeneralCheckAllChange')
-      // this.general_keys_select = is_checked
-      console.log('general_keys_select', this.general_keys_select)
-      this.handleAllChange(is_checked, this.general_keys, 0)
-    },
-    handleStructureCheckAllChange(is_checked) {
-      console.log('handleStructureCheckAllChange')
-      let offset_index = 0
-      for (let i = 0; i < this.general_keys.length; i++) {
-        if (this.formThead.includes(this.general_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      this.handleAllChange(is_checked, this.structure_keys, offset_index)
-    },
-    handleSpecialCheckAllChange(is_checked) {
-      console.log('handleSpecialCheckAllChange')
-      let offset_index = 0
-      for (let i = 0; i < this.general_keys.length; i++) {
-        if (this.formThead.includes(this.general_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.structure_keys.length; i++) {
-        if (this.formThead.includes(this.structure_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      this.handleAllChange(is_checked, this.special_keys, offset_index)
-    },
-    handlePerfusionCheckAllChange(is_checked) {
-      console.log('handlePerfusionCheckAllChange')
-      let offset_index = 0
-      for (let i = 0; i < this.general_keys.length; i++) {
-        if (this.formThead.includes(this.general_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.structure_keys.length; i++) {
-        if (this.formThead.includes(this.structure_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.special_keys.length; i++) {
-        if (this.formThead.includes(this.special_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      this.handleAllChange(is_checked, this.perfusion_keys, offset_index)
-    },
-    handleFunctionalCheckAllChange(is_checked) {
-      console.log('handleFunctionalCheckAllChange')
-      let offset_index = 0
-      for (let i = 0; i < this.general_keys.length; i++) {
-        if (this.formThead.includes(this.general_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.structure_keys.length; i++) {
-        if (this.formThead.includes(this.structure_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.special_keys.length; i++) {
-        if (this.formThead.includes(this.special_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      for (let i = 0; i < this.perfusion_keys.length; i++) {
-        if (this.formThead.includes(this.perfusion_keys[i])) {
-          offset_index = offset_index + 1
-        }
-      }
-      this.handleAllChange(is_checked, this.functional_keys, offset_index)
-    },
-    handleAllChange(is_checked, all_keys_list, offset_index) {
-      // console.log('handleCheckAllChange')
-      // console.log('is_checked', is_checked)
-      // console.log('offset_index', offset_index)
-      if (is_checked) {
-        for (let i = 0; i < all_keys_list.length; i++) {
-          const index = this.formThead.indexOf(all_keys_list[i])
-          if (index === -1) { // only splice array when item is found
-            this.formThead.splice(i + offset_index, 0, all_keys_list[i]) // 2nd parameter means remove one item only
-          }
-        }
-      } else {
-        for (let i = 0; i < all_keys_list.length; i++) {
-          const index = this.formThead.indexOf(all_keys_list[i])
-          if (index > -1) { // only splice array when item is found
-            this.formThead.splice(index, 1) // 2nd parameter means remove one item only
-          }
-        }
-      }
-    },
     addToProject(){
       console.log('addToProject')
-    },
-    handleAddKey(key) {
-      console.log('Added key:', key);
-    },
-    handleRemoveKey(key) {
-      console.log('Removed key:', key);
     },
   }
 }
