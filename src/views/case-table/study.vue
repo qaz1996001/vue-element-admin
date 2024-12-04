@@ -76,11 +76,11 @@
 import waves from '@/directive/waves'
 import Pagination from '@/components/Pagination/index.vue' // secondary package based on el-pagination
 import request from '@/utils/myrequest'
+// import request from '@/utils/request'
 import { parseTime } from '@/utils'
 import FilterContainer from '@/components/Custom/FilterContainer.vue'
 import ElTable from '@/components/Custom/ElTable.vue'
 import CustomSelect from '@/components/Custom/CustomSelect.vue'
-// import Pagination from '@/components/Custom/Pagination.vue'
 
 import { export_json_to_excel } from '@/vendor/Export2Excel'
 
@@ -90,7 +90,7 @@ export default {
   directives: { waves },
   data() {
     return {
-      base_url: '/query/v2/list_study',
+      base_url: '/study/query/series',
       formThead: [], // 顯示的欄位
       list: null,
       listKeys: [],
@@ -133,7 +133,6 @@ export default {
     getList(updateFormHead = false, is_search = false) {
       console.log('getList')
       this.listLoading = true
-      // const url = this.base_url + '/study/query/series'
       const url = this.base_url
       if (is_search) {
         console.log('this.search_list')
@@ -143,7 +142,12 @@ export default {
         })
         filter_list = filter_list.map(e => {
           if (e.op === 'like'){
-            e.value = '%'+ e.value +'%'
+            if (!e.value.startsWith('%')){
+              e.value = '%'+ e.value
+            }
+            if (!e.value.endsWith('%')){
+              e.value = e.value + '%'
+            }
           }
           return e
         })
@@ -153,19 +157,19 @@ export default {
           params: this.listQuery,
           data: { 'filter_': filter_list }
         }).then((response) => {
-          this.list = response.data.items
-          this.total = response.data.total
+          this.list = response.items
+          this.total = response.total
           console.log('this.total')
           console.log(this.total)
-          this.listKeys = response.data.key
-          this.general_keys = response.data.group_key.general_keys
-          this.structure_keys = response.data.group_key.structure_keys
-          this.special_keys = response.data.group_key.special_keys
-          this.perfusion_keys = response.data.group_key.perfusion_keys
-          this.functional_keys = response.data.group_key.functional_keys
+          this.listKeys = response.key
+          this.general_keys = response.group_key.general_keys
+          this.structure_keys = response.group_key.structure_keys
+          this.special_keys = response.group_key.special_keys
+          this.perfusion_keys = response.group_key.perfusion_keys
+          this.functional_keys = response.group_key.functional_keys
           this.search_key_list = []
           this.search_key_list.push(...this.general_keys, 'series_description')
-          this.op_list = response.data.op_list
+          this.op_list = response.op_list
           this.general_keys_select = true
           this.check_structure_keys_all = true
           this.check_special_keys_all = true
@@ -195,23 +199,25 @@ export default {
           params: this.listQuery,
           data: { 'filter_': [] }
         }).then((response) => {
-
-          this.list = response.data.data.items
-          this.total = response.data.data.total
-          this.listKeys = response.data.key
-          this.general_keys = response.data.group_key.general_keys
+          const res = response
+          this.list = response.items
+          this.total = response.total
+          this.listKeys = response.key
+          console.log('listKeys')
+          console.log(this.listKeys)
+          this.general_keys = response.group_key.general_keys
           this.general_keys_select.push(...this.general_keys)
-          this.structure_keys = response.data.group_key.structure_keys
+          this.structure_keys = response.group_key.structure_keys
           this.structure_keys_select.push(...this.structure_keys)
-          this.special_keys = response.data.group_key.special_keys
+          this.special_keys = response.group_key.special_keys
           this.special_keys_select.push(...this.special_keys)
-          this.perfusion_keys = response.data.group_key.perfusion_keys
+          this.perfusion_keys = response.group_key.perfusion_keys
           this.perfusion_keys_select.push(...this.perfusion_keys)
-          this.functional_keys = response.data.group_key.functional_keys
+          this.functional_keys = response.group_key.functional_keys
           this.functional_keys_select.push(...this.functional_keys)
           this.search_key_list = []
           this.search_key_list.push(...this.general_keys, 'series_description')
-          this.op_list = response.data.op_list
+          this.op_list = response.op_list
           // 更新要顯示的欄位
           if (updateFormHead) {
             this.formThead = []
@@ -220,23 +226,18 @@ export default {
             this.formThead.push(...this.special_keys_select)
             this.formThead.push(...this.perfusion_keys_select)
             this.formThead.push(...this.functional_keys_select)
-        }
+          }
           setTimeout(() => {
             this.listLoading = false
           }, 1.5 * 1000)
-        }).catch((error) => console.log('catch' + error))
+        })
         // 完成查詢
         this.listLoading = false
       }
     },
     downloadExcel() {
       const url = this.base_url + '/download'
-      // const url = '/query/v2/list_study/download'
-      // console.log('this.downloadExcel')
-      // console.log('this.search_list')
-      // console.log(this.search_list)
-      // console.log('this.formThead')
-      // console.log(this.formThead)
+
       const filter_list = this.search_list.filter(e => {
         return (e.field.length > 0) & (e.op.length > 0) & (e.value.length > 0)
       })
@@ -246,19 +247,10 @@ export default {
         params: this.listQuery,
         data: { 'filter_': filter_list }
       }).then((response) => {
-        const header = response.data.key.filter(e => {
+        const header = response.key.filter(e => {
           return this.formThead.includes(e);
         })
-        // console.log('header')
-        // console.log(header)
-        let items = response.data.data.items
-        // let items = response.data.items.map((x) =>{
-        //   let series_description = x['series_description']
-        //   for (let seriesDescriptionElement of series_description) {
-        //     x[seriesDescriptionElement] = 1
-        //   }
-        //   return x
-        // })
+        let items = response.items
         const data = this.formatJson(header, items)
 
         export_json_to_excel({
@@ -325,4 +317,5 @@ button.el-button {
 }
 
 </style>
+
 

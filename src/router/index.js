@@ -127,16 +127,16 @@ export const asyncRoutes = [
           roles: ['admin', 'editor']
         }
       },
-      {
-        path: 'study-text-report',
-        component: () => import('@/views/case-table/list-study-text'),
-        name: 'StudyText',
-        meta: {
-          title: 'study text report',
-          roles: ['admin', 'editor']
-          // if do not set roles, means: this page does not require permission
-        }
-      },
+      // {
+      //   path: 'study-text-report',
+      //   component: () => import('@/views/case-table/list-study-text'),
+      //   name: 'StudyText',
+      //   meta: {
+      //     title: 'study text report',
+      //     roles: ['admin', 'editor']
+      //     // if do not set roles, means: this page does not require permission
+      //   }
+      // },
       {
         path: 'text-report',
         component: () => import('@/views/case-table/text-report'),
@@ -149,39 +149,6 @@ export const asyncRoutes = [
       }
     ]
   },
-  // {
-  //   path: '/fastapi',
-  //   component: Layout,
-  //   redirect: '/patient/page',
-  //   alwaysShow: true, // will always show the root menu
-  //   name: 'fastapi',
-  //   meta: {
-  //     title: 'fastapi',
-  //     icon: 'table',
-  //     roles: ['admin', 'editor'] // you can set roles in root nav
-  //   },
-  //   children: [
-  //     {
-  //       path: 'patient-page',
-  //       component: () => import('@/views/fastapi/patient/index_bak'),
-  //       name: 'PatientPage',
-  //       meta: {
-  //         title: 'Patient Page',
-  //         roles: ['admin', 'editor'] // or you can only set roles in sub nav
-  //       }
-  //     },
-  //     {
-  //       path: 'study-page',
-  //       component: () => import('@/views/fastapi/study/index_bak'),
-  //       name: 'StudyPage',
-  //       meta: {
-  //         title: 'Study Page',
-  //         roles: ['admin', 'editor'] // or you can only set roles in sub nav
-  //       }
-  //     }
-  //   ]
-  // },
-  // tableRouter,
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }

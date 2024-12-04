@@ -27,6 +27,7 @@
     "fuse.js": "3.4.4",
     "js-cookie": "2.2.0",
     "jsonlint": "1.6.3",
+    "jsonpath-plus": "^10.2.0",
     "jszip": "3.2.1",
     "normalize.css": "7.0.0",
     "nprogress": "0.2.0",

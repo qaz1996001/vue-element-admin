@@ -64,8 +64,17 @@
       <template v-for="key in formThead">
         <el-table-column v-if="formThead.includes(`${key}`)" :key="key" align="center" :label="`${key}`">
           <template slot-scope="{row}">
+            <span v-if="!key.startsWith('extra_data')">
+              {{ row[key] }}
+            </span>
+            <!-- 顯示 extra_data 內的值 -->
+            <span v-else>
+
+              {{ getJsonPathValue(row['extra_data'], key) }}
+            </span>
             <!-- 顯示 row.studies_date 和 row.gender 等等 -->
-            <span>{{ row[key] }}</span>
+<!--            <span>{{ row[key] }}</span>-->
+<!--            <span v-if="key.startsWith('extra_data')"  >{{ row['extra_data'][key] }}</span>-->
           </template>
         </el-table-column>
       </template>
@@ -86,10 +95,12 @@ import waves from '@/directive/waves'
 // import { fetchList } from '@/api/study'
 import Pagination from '@/components/Pagination/index.vue' // secondary package based on el-pagination
 import request from '@/utils/myrequest'
+import { JSONPath } from 'jsonpath-plus';
+
 export default {
   name: 'ProjectStudy',
-  components: { Pagination },
-  directives: { waves },
+  components: {Pagination},
+  directives: {waves},
   created() {
     this.getList(true)
   },
@@ -116,7 +127,7 @@ export default {
           value: ''
         }
       ],
-      project_list:[],
+      project_list: [],
       current_project_name: '',
       current_project_uid: '',
 
@@ -127,20 +138,18 @@ export default {
     this.getProjectList()
   },
   methods: {
-    getProjectList(){
+    getProjectList() {
       request({
         url: '/project',
         method: 'get'
       }).then((response) => {
-        this.project_list = response.data.data.items
-        // console.log('getProjectList')
-        // console.log(response)
+        this.project_list = response.items
         setTimeout(() => {
         }, 1.5 * 1000)
       })
 
     },
-    getList(updateFormHead = false){
+    getList(updateFormHead = false) {
       console.log('getList')
       console.log(this.project_name)
       console.log('this.search_list')
@@ -148,25 +157,27 @@ export default {
       const filter_list = this.search_list.filter(e => {
         return (e.field.length > 0) & (e.op.length > 0) & (e.value.length > 0)
       })
-      filter_list.push({ field: 'project_uid',
+      filter_list.push({
+        field: 'project_uid',
         op: '==',
-        value: this.current_project_uid})
+        value: this.current_project_uid
+      })
       request({
         url: '/project_study/get_data',
         method: 'post',
         params: this.listQuery,
-        data: { 'filter_': filter_list }
+        data: {'filter_': filter_list}
       }).then((response) => {
         console.log('response')
         console.log(response)
-        this.list            = response.data.data.items
-        this.total           = response.data.data.total
-        this.formThead       = response.data.key
-        this.op_list         = response.data.op_list
-        this.general_keys    = response.data.group_key.general_keys
+        this.list = response.items
+        this.total = response.total
+        this.formThead = response.key
+        this.op_list = response.op_list
+        this.general_keys = response.group_key.general_keys
         this.search_key_list = []
         this.search_key_list.push(...this.general_keys)
-        this.search_key_list.push(...response.data.group_key.extra_data_keys)
+        this.search_key_list.push(...response.group_key.extra_data_keys)
 
         setTimeout(() => {
           this.listLoading = false
@@ -216,10 +227,10 @@ export default {
         }
       }
     },
-    selectProject(items){
+    selectProject(items) {
       console.log('selectProject')
-      this.project_list.forEach(e =>{
-        if (items === e.project_uid){
+      this.project_list.forEach(e => {
+        if (items === e.project_uid) {
           console.log(e)
           this.current_project_name = e.project_name
         }
@@ -227,10 +238,22 @@ export default {
       console.log(this.current_project_name)
       console.log(this.current_project_uid)
       this.getList()
+    },
+    getJsonPathValue(data, key) {
+      if (!data || !key.startsWith('extra_data')) return null;
+      try {
+        // 將 "extra_data.some.path" 轉換為 JSONPath 格式 "$.some.path"
+        const path = key.replace('extra_data', '$');
+        const result = JSONPath({path, json: data});
+        // 返回第一個匹配的值或 null
+        return Array.isArray(result) && result.length > 0 ? result[0] : null;
+      } catch (error) {
+        console.error(`Error parsing JSONPath for key "${key}":`, error);
+        return null;
+      }
     }
   }
 }
-
 </script>
 <style>
 

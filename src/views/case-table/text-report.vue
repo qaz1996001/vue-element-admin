@@ -1,48 +1,17 @@
 <template>
   <div class="app-container">
-    <div class="filter-container">
-      <div>
-        <el-form ref="search_list" v-model="search_list">
-          <el-form-item v-for="(item, index) in search_list">
-            <el-row>
-              <el-col :span="6">
-                <el-select v-model="item.field" placeholder="請選擇欄位">
-                  <el-option v-for="key in general_keys" :key="key" :label="key" :value="key" />
-                </el-select>
-              </el-col>
-              <el-col :span="6">
-                <el-select v-model="item.op" placeholder="計算符號">
-                  <el-option v-for="op in op_list" :key="op" :label="op" :value="op" />
-                </el-select>
-              </el-col>
-              <el-col :span="6">
-                <el-input v-model="item.value" placeholder="請輸入" />
-              </el-col>
-              <el-col :span="6">
-                <el-button v-if="index !== 0" type="danger" @click="del_search_item(index)"> del </el-button>
-                <el-button v-if="index === 0" type="primary" @click="add_search_item">add</el-button>
-              </el-col>
-            </el-row>
-          </el-form-item>
-          <el-row>
-            <el-col :span="8">
-              <el-button type="primary" @click="getList(false,true)">search</el-button>
-            </el-col>
-          </el-row>
-        </el-form>
+    <FilterContainer
+      :searchKeyList="search_key_list"
+      :opList="op_list"
+      :searchList="search_list"
+      @addSearchItem="add_search_item"
+      @delSearchItem="del_search_item"
+      @onSearch="getList(true,true)"
+    />
+    <!--      @downloadExcel="downloadExcel"-->
+<!--      @addToProject="addToProject"-->
 
-        <el-form>
-          <el-checkbox-group v-model="formThead">
-            <el-row>
-              <el-form-item label="General" />
-              <el-checkbox v-for="key in general_keys" :key="key" :label="`${key}`" :checked="true">{{ key }}</el-checkbox>
-            </el-row>
-          </el-checkbox-group>
-        </el-form>
-      </div>
-    </div>
 
-    <!--    <el-table v-loading="listLoading" :data="list" border fit highlight-current-row>-->
     <el-table v-loading="listLoading" :data="list" border @selection-change="handleSelectionChange">
       <!-- 特定欄位可能寬度需要調整 -->
       <el-table-column type="selection" align="center" />
@@ -77,14 +46,18 @@
 import Pagination from '@/components/Pagination/index.vue'
 import waves from '@/directive/waves'
 import request from '@/utils/myrequest'
+import FilterContainer from "@/components/Custom/FilterContainer.vue";
+import ElTable from '@/components/Custom/ElTable.vue'
+import CustomSelect from '@/components/Custom/CustomSelect.vue'
 
 export default {
   name: 'TextRepost',
-  components: { Pagination },
+  components: {FilterContainer, Pagination },
   directives: { waves },
   data() {
     return {
-      formThead: ['accession_number'], // 顯示的欄位
+      formThead: ['accession_number','text'], // 顯示的欄位
+      search_key_list: ['accession_number','text'],
       table_min_width: { 'patient_id': '15%', 'gender': '10%', 'age': '10%', 'study_description': '30%',
         'accession_number': '25%'
       },
@@ -116,14 +89,25 @@ export default {
   methods: {
     getList(updateFormHead = false, is_search = false) {
       this.listLoading = true
-      const url = '/query/v2/text_report'
-      const filter_list = this.search_list.filter(e => {
+      const url = '/text_report/query'
+      let filter_list = this.search_list.filter(e => {
         return (e.field.length > 0) & (e.op.length > 0) & (e.value.length > 0)
       }).map(e => {
         e.value = e.value.trim()
         return e
       }
       )
+      filter_list = filter_list.map(e => {
+        if (e.op === 'like'){
+          if (!e.value.startsWith('%')){
+            e.value = '%'+ e.value
+          }
+          if (!e.value.endsWith('%')){
+            e.value = e.value + '%'
+          }
+        }
+        return e
+      })
 
       const rep = request({
         url: url,
@@ -133,11 +117,9 @@ export default {
       }).then((response) => {
         console.log('測試 api')
         // console.log('response', response)
-        this.list = response.data.data.items
-        this.total = response.data.data.total
-        this.listKeys = response.data.key
-        this.general_keys = response.data.group_key.general_keys
-        this.op_list = response.data.op_list
+        this.list = response.items
+        this.total = response.total
+        this.op_list = response.op_list
         setTimeout(() => {
           this.listLoading = false
         }, 1.5 * 1000)
@@ -145,8 +127,7 @@ export default {
         .catch((error) => console.log('catch' + error))
       // 完成查詢
       this.listLoading = false
-      this.formThead = []
-      this.formThead.push(...this.general_keys)
+
     },
     add_search_item() {
       this.search_list.push({

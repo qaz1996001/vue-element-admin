@@ -71,12 +71,12 @@ import { getProject,addProject } from '@/api/project'
 import request from '@/utils/myrequest'
 import UploadExcelComponent from '@/components/UploadExcel/index.vue'
 export default {
-  name: 'Study',
+  name: 'Project',
   components: { UploadExcelComponent },
   directives: { waves },
   data() {
     return {
-      formThead: ['patients_id', 'studies_date', 'gender'], // 顯示的欄位
+      formThead: [], // 顯示的欄位
       list: null,
       listKeys: [],
       total: 0,
@@ -102,24 +102,17 @@ export default {
   methods: {
     getList(updateFormHead = false) {
       this.listLoading = true
+      console.log('case-project.vue')
       getProject().then(response => {
-        console.log('response')
-        console.log(response)
-        // this.list = response.data.items
-        // this.total = response.data.total
-        // console.log('this.list')
-        // console.log(this.list)
-        this.list = response.data.data.items
-        this.total = response.data.data.total
-        this.listKeys = response.data.key
-
-        // Just to simulate the time of the request
-        setTimeout(() => {
-          this.listLoading = false
-        }, 1.5 * 1000)
+        this.list = response.items
+        this.total = response.total
+        this.listKeys = response.key
       })
+      // Just to simulate the time of the request
+      setTimeout(() => {
+        this.listLoading = false
+      }, 1.0 * 1000)
     },
-
     createdProject() {
       console.log('createdProject')
       if (this.temp.projectName.length > 0) {
@@ -139,9 +132,6 @@ export default {
     updateProject() {
       console.log('updateProject')
     },
-    indexMethod(index) {
-      return index + 1
-    },
     deleteProject() {
       this.listLoading = true
       this.selection_list.forEach(e => {
@@ -156,9 +146,6 @@ export default {
             this.listLoading = false
           }, 1.5 * 1000)
         }).catch((error) => console.log('catch' + error))
-        // console.log(e)
-        // console.log(url)
-        // this.listLoading = false
       })
     },
     handleSelectionChange(selection) {

@@ -5,7 +5,14 @@
     <el-table-column v-for="key in columns" :key="key" :label="key" align="center">
       <template #default="{row}">
         <span>{{ row[key] }}</span>
-      </template>
+        <span v-for=" series_list in row['series_description']" >
+          <span v-for=" (item, index) in series_list" >
+            <span v-if="index ===key">
+              {{ item }}
+            </span>
+          </span>
+        </span>
+        </template>
     </el-table-column>
 <!--    <template v-for="key in columns" :key="key">-->
 <!--      <el-table-column :label="key" align="center">-->
@@ -18,7 +25,14 @@
 </template>
 
 <script>
+import series from "@/views/case-table/series.vue";
+
 export default {
+  computed: {
+    series() {
+      return series
+    }
+  },
   props: {
     data: Array,
     columns: Array,

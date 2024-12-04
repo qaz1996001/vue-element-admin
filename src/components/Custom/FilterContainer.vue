@@ -40,6 +40,9 @@ export default {
   },
   methods: {
     addSearchItem() {
+      console.log(this.searchKeyList)
+      console.log(this.opList)
+      console.log(this.searchList)
       this.$emit('addSearchItem')
     },
     delSearchItem(index) {
