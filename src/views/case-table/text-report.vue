@@ -21,12 +21,15 @@
           :key="key"
           align="center"
           :label="`${key}`"
-          :min-width="table_min_width[key]"
-        >
+          :min-width="table_min_width[key]">
           <template slot-scope="{row}">
             <!--             顯示 row.studies_date 和 row.gender 等等-->
-            {{ row[key] }}
-            <!--            <span>{{ row[key] }}</span>-->
+             <el-tooltip v-if="key.startsWith('text')| key.startsWith('impression')" class="item" effect="light" :content="row[key]" placement="top-start">
+               <div slot="content" >{{ row[key] }}</div>
+               <div class="btn">{{ row[key] }}</div>
+             </el-tooltip>
+            <div v-else >{{ row[key] }}</div>
+
           </template>
         </el-table-column>
       </template>
@@ -56,9 +59,10 @@ export default {
   directives: { waves },
   data() {
     return {
-      formThead: ['accession_number','text'], // 顯示的欄位
-      search_key_list: ['accession_number','text'],
-      table_min_width: { 'patient_id': '15%', 'gender': '10%', 'age': '10%', 'study_description': '30%',
+      // formThead: ['accession_number','text'], // 顯示的欄位
+      formThead: ['patient_id', 'gender', 'accession_number', 'study_description', 'text', 'impression'],
+      search_key_list: ['patient_id', 'gender', 'accession_number', 'study_description', 'text'],
+      table_min_width: { 'patient_id': '15%', 'gender': '15%', 'study_description': '30%',
         'accession_number': '25%'
       },
       list: null,
@@ -184,5 +188,14 @@ button.el-button.el-button--danger {
 .el-table td.el-table_1_column_8.is-center .cell{
   white-space: pre-wrap;
 
+}
+.el-tooltip__popper {
+  max-width: 50vw;
+  font-size: 16px;
+}
+.btn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
